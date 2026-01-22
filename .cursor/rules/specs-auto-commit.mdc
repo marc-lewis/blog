@@ -1,10 +1,11 @@
 ---
 description: Auto-commit and push spec changes
-globs: specs/*.md, SPECS.md
+globs: 
+alwaysApply: true
 ---
 # Specs Auto-Commit
 
-Automatically commit and push changes whenever specification files are updated.
+**IMPORTANT: Always commit and push immediately after modifying any spec file (`specs/*.md`, `SPECS.md`).**
 
 <rule>
 name: specs_auto_commit

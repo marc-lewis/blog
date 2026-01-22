@@ -37,11 +37,13 @@ actions:
 
       3. **Do your work** in the worktree directory
 
-      4. **When work is complete**, commit and push your changes.
+      4. **When work is complete**, run the relevant tests and ensure they pass.
 
-      5. **Raise a PR immediately** after the commit is pushed.
+      5. **Commit and push** your changes.
 
-      6. **After the PR is merged**, remove the worktree:
+      6. **Raise a PR immediately** after tests pass and the commit is pushed.
+
+      7. **After the PR is merged**, remove the worktree:
          ```bash
          cd ../marclewis-blog
          git worktree remove ../marclewis-blog-<branch-name>

@@ -62,12 +62,14 @@ actions:
       # ... do work ...
       ```
 
-      ## Exceptions
+      ## No Exceptions
 
-      Skip worktrees only for:
-      - Trivial one-line fixes
-      - Documentation-only changes to specs (auto-committed per specs-auto-commit rule)
-      - Emergency hotfixes that must go directly to main
+      This rule has NO exceptions. Always create a worktree, regardless of:
+      - How small the change is
+      - Whether it's "just documentation"
+      - How urgent it seems
+
+      Every change goes through a worktree. No excuses.
 
 metadata:
   priority: high

@@ -37,7 +37,11 @@ actions:
 
       3. **Do your work** in the worktree directory
 
-      4. **When finished**, create a PR or merge, then clean up:
+      4. **When work is complete**, commit and push your changes.
+
+      5. **Raise a PR immediately** after the commit is pushed.
+
+      6. **After the PR is merged**, clean up:
          ```bash
          cd ../marclewis-blog
          git worktree remove ../marclewis-blog-<branch-name>

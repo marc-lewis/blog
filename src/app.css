@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		@apply antialiased;
+	}
+
+	/* Syntax highlighting theme support */
+	:root {
+		--shiki-color-text: #24292e;
+		--shiki-color-background: #f6f8fa;
+		--shiki-token-constant: #005cc5;
+		--shiki-token-string: #032f62;
+		--shiki-token-comment: #6a737d;
+		--shiki-token-keyword: #d73a49;
+		--shiki-token-parameter: #24292e;
+		--shiki-token-function: #6f42c1;
+		--shiki-token-string-expression: #032f62;
+		--shiki-token-punctuation: #24292e;
+		--shiki-token-link: #032f62;
+	}
+
+	.dark {
+		--shiki-color-text: #e1e4e8;
+		--shiki-color-background: #24292e;
+		--shiki-token-constant: #79b8ff;
+		--shiki-token-string: #9ecbff;
+		--shiki-token-comment: #6a737d;
+		--shiki-token-keyword: #f97583;
+		--shiki-token-parameter: #e1e4e8;
+		--shiki-token-function: #b392f0;
+		--shiki-token-string-expression: #9ecbff;
+		--shiki-token-punctuation: #e1e4e8;
+		--shiki-token-link: #9ecbff;
+	}
+}
+
+@layer components {
+	.prose pre {
+		@apply rounded-lg border border-zinc-200 dark:border-zinc-800;
+	}
+
+	.prose pre code {
+		@apply text-sm;
+	}
+
+	.prose a {
+		@apply text-blue-600 dark:text-blue-400 no-underline hover:underline;
+	}
+
+	.prose h1,
+	.prose h2,
+	.prose h3,
+	.prose h4 {
+		@apply font-semibold text-zinc-900 dark:text-zinc-100;
+	}
+
+	.prose p {
+		@apply text-zinc-700 dark:text-zinc-300;
+	}
+
+	.prose li {
+		@apply text-zinc-700 dark:text-zinc-300;
+	}
+
+	.prose blockquote {
+		@apply border-l-4 border-zinc-300 dark:border-zinc-700 pl-4 italic text-zinc-600 dark:text-zinc-400;
+	}
+}

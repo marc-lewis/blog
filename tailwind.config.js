@@ -5,8 +5,8 @@ export default {
 	theme: {
 		extend: {
 			fontFamily: {
-				sans: ['Inter', 'system-ui', 'sans-serif'],
-				mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+				sans: ['Courier Prime', 'Courier', 'monospace'],
+				mono: ['Courier Prime', 'Courier', 'monospace']
 			},
 			typography: {
 				DEFAULT: {

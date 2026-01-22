@@ -10,24 +10,21 @@
 </script>
 
 <svelte:head>
-	<title>Blog - Marc Lewis</title>
+	<title>blog - marc lewis</title>
 	<meta name="description" content="All blog posts from Marc Lewis" />
 </svelte:head>
 
-<div class="mx-auto max-w-3xl px-6 py-16">
-	<h1 class="text-4xl font-bold tracking-tight">Blog</h1>
-	<p class="mt-4 text-zinc-600 dark:text-zinc-400">
-		Thoughts, learnings, and the occasional rant about software.
-	</p>
+<div class="p-5">
+	<h1 class="font-bold text-base p-1 mb-4">blog</h1>
 
 	{#if data.posts.length > 0}
-		<div class="mt-12 space-y-6">
+		<div class="flex flex-wrap gap-4">
 			{#each data.posts as post}
 				<PostCard {post} />
 			{/each}
 		</div>
 	{:else}
-		<p class="mt-12 text-zinc-600 dark:text-zinc-400">
+		<p class="text-sm p-1">
 			No posts yet. Check back soon!
 		</p>
 	{/if}

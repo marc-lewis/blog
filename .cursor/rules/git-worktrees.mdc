@@ -41,7 +41,7 @@ actions:
 
       5. **Raise a PR immediately** after the commit is pushed.
 
-      6. **After the PR is merged**, clean up:
+      6. **After the PR is merged**, remove the worktree:
          ```bash
          cd ../marclewis-blog
          git worktree remove ../marclewis-blog-<branch-name>

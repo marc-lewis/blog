@@ -1,0 +1,75 @@
+---
+description: Conventional Commits
+globs: 
+alwaysApply: true
+---
+# Conventional Commits
+
+Always use conventional commits when creating git commits.
+
+<rule>
+name: conventional_commits
+description: Enforce conventional commit message format for all git commits
+
+actions:
+  - type: enforce
+    message: |
+      Always use conventional commits format for all commit messages:
+
+      ## Format
+
+      ```
+      <type>(<scope>): <subject>
+
+      [optional body]
+
+      [optional footer(s)]
+      ```
+
+      ## Types (required)
+
+      - **feat**: A new feature
+      - **fix**: A bug fix
+      - **docs**: Documentation changes
+      - **style**: Formatting, missing semicolons, etc. (no code change)
+      - **refactor**: Code restructuring without changing behaviour
+      - **test**: Adding or updating tests
+      - **chore**: Maintenance tasks, dependency updates, etc.
+      - **perf**: Performance improvements
+      - **ci**: CI/CD changes
+      - **build**: Build system or external dependency changes
+
+      ## Scope (optional)
+
+      The scope should indicate what part of the codebase is affected, e.g.:
+      - `feat(blog)`: feature related to blog functionality
+      - `fix(header)`: fix in the header component
+      - `chore(deps)`: dependency-related maintenance
+
+      ## Subject
+
+      - Use imperative mood ("add" not "added" or "adds")
+      - Don't capitalise the first letter
+      - No full stop at the end
+      - Keep it concise (50 characters or less)
+
+      ## Examples
+
+      ```
+      feat(blog): add new post about Kubernetes
+      fix(header): correct navigation link alignment
+      docs(readme): update installation instructions
+      refactor(posts): simplify date parsing logic
+      chore(deps): update SvelteKit to latest version
+      feat(auth): add OAuth2 login support
+
+      Implements Google and GitHub OAuth providers.
+      Includes token refresh logic.
+
+      Closes #123
+      ```
+
+metadata:
+  priority: high
+  version: 1.0
+</rule>

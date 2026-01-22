@@ -1,0 +1,91 @@
+---
+description: Component Testing Requirement
+globs: **/components/**/*.svelte, src/lib/components/*.svelte
+---
+# Component Testing Requirement
+
+When creating or modifying components, unit tests must be created or updated to verify correct behaviour.
+
+<rule>
+name: component_testing_requirement
+description: Ensure all components have accompanying unit tests
+
+actions:
+  - type: enforce
+    message: |
+      When creating or significantly modifying a component, you MUST also create or update its unit tests.
+
+      ## Requirements
+
+      1. **Every new component must have a test file**
+         - Component: `src/lib/components/MyComponent.svelte`
+         - Test file: `src/lib/components/MyComponent.test.ts`
+
+      2. **Test file naming convention**
+         - Use `.test.ts` suffix (not `.spec.ts`)
+         - Place test file alongside the component
+
+      3. **What to test**
+         - Component renders without errors
+         - Props are handled correctly
+         - User interactions work as expected
+         - Conditional rendering logic
+         - Slot content (if applicable)
+         - Events are emitted correctly
+
+      ## Example Structure
+
+      ```
+      src/lib/components/
+      ├── Button.svelte
+      ├── Button.test.ts      # Tests for Button
+      ├── PostCard.svelte
+      ├── PostCard.test.ts    # Tests for PostCard
+      └── ...
+      ```
+
+      ## Minimum Test Coverage
+
+      At minimum, each component test should verify:
+
+      ```ts
+      import { describe, it, expect } from 'vitest'
+      import { render, screen } from '@testing-library/svelte'
+      import MyComponent from './MyComponent.svelte'
+
+      describe('MyComponent', () => {
+        describe('and when it renders', () => {
+          it('should render without errors', () => {
+            render(MyComponent)
+            // Assert component is in the document
+          })
+        })
+
+        describe('and when props are provided', () => {
+          it('should display the correct content', () => {
+            render(MyComponent, { props: { title: 'Test' } })
+            expect(screen.getByText('Test')).toBeInTheDocument()
+          })
+        })
+      })
+      ```
+
+      ## Checklist
+
+      - [ ] Test file created alongside component
+      - [ ] Test file follows naming convention (`ComponentName.test.ts`)
+      - [ ] Basic render test included
+      - [ ] Props are tested
+      - [ ] User interactions tested (if applicable)
+      - [ ] Test follows the format defined in `unit-tests.mdc`
+
+      ## References
+
+      - Follow the test format defined in `.cursor/rules/unit-tests.mdc`
+      - Use `@testing-library/svelte` for component testing
+      - Use `vitest` as the test runner
+
+metadata:
+  priority: high
+  version: 1.0
+</rule>

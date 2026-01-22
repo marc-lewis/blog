@@ -1,0 +1,458 @@
+---
+description: Svelte 5 and SvelteKit Best Practices
+globs: **/*.svelte, **/+page.ts, **/+page.server.ts, **/+layout.ts, **/+layout.server.ts, **/+server.ts
+---
+# Svelte 5 and SvelteKit Best Practices
+
+Standards for writing Svelte 5 components and SvelteKit applications.
+
+<rule>
+name: svelte_best_practices
+description: Enforce Svelte 5 and SvelteKit conventions and best practices
+
+actions:
+  - type: enforce
+    message: |
+      ## Svelte 5 Runes
+
+      Always use Svelte 5 runes for reactivity. Never use the legacy `$:` reactive syntax.
+
+      ### Props with `$props()`
+
+      ```svelte
+      <script lang="ts">
+        interface Props {
+          title: string;
+          count?: number;
+          children?: import('svelte').Snippet;
+        }
+
+        let { title, count = 0, children }: Props = $props();
+      </script>
+      ```
+
+      ### State with `$state()`
+
+      ```svelte
+      <script lang="ts">
+        let count = $state(0);
+        let items = $state<string[]>([]);
+      </script>
+      ```
+
+      ### Derived values with `$derived()`
+
+      Use `$derived()` for computed values instead of `$:` reactive statements.
+
+      ```svelte
+      <script lang="ts">
+        let count = $state(0);
+        let doubled = $derived(count * 2);
+        let isEven = $derived(count % 2 === 0);
+      </script>
+      ```
+
+      ### Side effects with `$effect()`
+
+      ```svelte
+      <script lang="ts">
+        let count = $state(0);
+
+        $effect(() => {
+          console.log(`Count changed to ${count}`);
+          // Cleanup function (optional)
+          return () => {
+            console.log('Cleaning up');
+          };
+        });
+      </script>
+      ```
+
+      ### Complex derived values with `$derived.by()`
+
+      Use `$derived.by()` when you need a function body for complex computations:
+
+      ```svelte
+      <script lang="ts">
+        let items = $state<{ price: number; quantity: number }[]>([]);
+
+        let total = $derived.by(() => {
+          let sum = 0;
+          for (const item of items) {
+            sum += item.price * item.quantity;
+          }
+          return sum;
+        });
+      </script>
+      ```
+
+      ### Bindable props with `$bindable()`
+
+      In Svelte 5, props are NOT bindable by default. Use `$bindable()` explicitly:
+
+      ```svelte
+      <script lang="ts">
+        interface Props {
+          value: string;
+          open?: boolean;
+        }
+
+        let { value = $bindable(), open = $bindable(false) }: Props = $props();
+      </script>
+
+      <!-- Parent can now use bind:value and bind:open -->
+      ```
+
+      ### Debugging with `$inspect()`
+
+      Use `$inspect()` for reactive debugging (development only):
+
+      ```svelte
+      <script lang="ts">
+        let count = $state(0);
+        let user = $state({ name: 'Alice' });
+
+        // Logs whenever count or user changes
+        $inspect(count);
+        $inspect(user);
+
+        // With custom handler
+        $inspect(count).with(console.trace);
+      </script>
+      ```
+
+      ### Non-reactive snapshots with `$state.snapshot()`
+
+      Get a plain object from reactive state (useful for logging, external APIs, or serialisation):
+
+      ```svelte
+      <script lang="ts">
+        let user = $state({ name: 'Alice', scores: [1, 2, 3] });
+
+        function saveToApi() {
+          // Get non-proxy plain object
+          const data = $state.snapshot(user);
+          fetch('/api/user', { body: JSON.stringify(data) });
+        }
+      </script>
+      ```
+
+      ## Deep Reactivity Caveats
+
+      `$state` creates deeply reactive proxies. Be aware of these pitfalls:
+
+      ### Don't destructure reactive state
+
+      ```svelte
+      <script lang="ts">
+        let user = $state({ name: 'Alice', age: 30 });
+
+        // BAD: loses reactivity
+        let { name, age } = user;
+
+        // GOOD: access properties directly
+        // use user.name and user.age in template
+      </script>
+      ```
+
+      ### Extracting values breaks reactivity
+
+      ```svelte
+      <script lang="ts">
+        let todos = $state([{ done: false, text: 'Learn Svelte' }]);
+
+        // BAD: firstTodo is not reactive
+        let firstTodo = todos[0];
+
+        // GOOD: use $derived for extracted values
+        let firstTodo = $derived(todos[0]);
+      </script>
+      ```
+
+      ## Component Structure
+
+      ### File organisation
+
+      1. `<script lang="ts">` block first (always use TypeScript)
+      2. Markup (HTML)
+      3. `<style>` block last (if needed, prefer Tailwind)
+
+      ### Props interface pattern
+
+      Always define a `Props` interface for component props:
+
+      ```svelte
+      <script lang="ts">
+        interface Props {
+          required: string;
+          optional?: number;
+        }
+
+        let { required, optional = 42 }: Props = $props();
+      </script>
+      ```
+
+      ### Snippets over slots
+
+      Prefer snippets (Svelte 5) over slots for composability:
+
+      ```svelte
+      <!-- Parent -->
+      <Card>
+        {#snippet header()}
+          <h2>Title</h2>
+        {/snippet}
+        {#snippet content()}
+          <p>Body content</p>
+        {/snippet}
+      </Card>
+
+      <!-- Card.svelte -->
+      <script lang="ts">
+        import type { Snippet } from 'svelte';
+
+        interface Props {
+          header: Snippet;
+          content: Snippet;
+        }
+
+        let { header, content }: Props = $props();
+      </script>
+
+      <article>
+        {@render header()}
+        {@render content()}
+      </article>
+      ```
+
+      ## SvelteKit Conventions
+
+      ### Load functions
+
+      - Use `+page.server.ts` for server-only data (database, secrets)
+      - Use `+page.ts` for universal load functions
+      - Always type load functions properly
+
+      ```typescript
+      // +page.server.ts
+      import type { PageServerLoad } from './$types';
+      import { error } from '@sveltejs/kit';
+
+      export const load: PageServerLoad = async ({ params }) => {
+        const post = await getPost(params.slug);
+
+        if (!post) {
+          error(404, 'Post not found');
+        }
+
+        return { post };
+      };
+      ```
+
+      ### Form actions
+
+      Use form actions for mutations, not API endpoints:
+
+      ```typescript
+      // +page.server.ts
+      import type { Actions } from './$types';
+      import { fail } from '@sveltejs/kit';
+
+      export const actions: Actions = {
+        default: async ({ request }) => {
+          const data = await request.formData();
+          const email = data.get('email');
+
+          if (!email) {
+            return fail(400, { email, missing: true });
+          }
+
+          // Process form...
+          return { success: true };
+        }
+      };
+      ```
+
+      ### File naming
+
+      - `+page.svelte` - Page component
+      - `+page.ts` - Universal load function
+      - `+page.server.ts` - Server-only load function
+      - `+layout.svelte` - Layout component
+      - `+layout.ts` / `+layout.server.ts` - Layout load functions
+      - `+error.svelte` - Error page
+      - `+server.ts` - API endpoint
+      - `hooks.server.ts` - Server hooks
+      - `hooks.client.ts` - Client hooks
+
+      ### Environment variables
+
+      Use the appropriate `$env` module for environment variables:
+
+      ```typescript
+      // Server-only secrets (build-time)
+      import { DATABASE_URL } from '$env/static/private';
+
+      // Server-only secrets (runtime)
+      import { env } from '$env/dynamic/private';
+
+      // Public variables (build-time, can be used in client)
+      import { PUBLIC_API_URL } from '$env/static/public';
+
+      // Public variables (runtime)
+      import { env } from '$env/dynamic/public';
+      ```
+
+      **Rules:**
+      - Never import `$env/static/private` or `$env/dynamic/private` in client code
+      - Prefix public variables with `PUBLIC_` in your `.env` file
+      - Prefer static imports for better tree-shaking
+
+      ### Error handling hooks
+
+      Implement `handleError` for proper error handling:
+
+      ```typescript
+      // hooks.server.ts
+      import type { HandleServerError } from '@sveltejs/kit';
+
+      export const handleError: HandleServerError = async ({ error, event, status, message }) => {
+        const errorId = crypto.randomUUID();
+
+        // Log to your error tracking service
+        console.error({ errorId, error, path: event.url.pathname });
+
+        return {
+          message: 'An unexpected error occurred',
+          errorId
+        };
+      };
+      ```
+
+      ```typescript
+      // hooks.client.ts
+      import type { HandleClientError } from '@sveltejs/kit';
+
+      export const handleError: HandleClientError = async ({ error, status, message }) => {
+        const errorId = crypto.randomUUID();
+
+        // Report to error tracking (e.g., Sentry)
+        console.error({ errorId, error });
+
+        return {
+          message: 'Something went wrong',
+          errorId
+        };
+      };
+      ```
+
+      ### Link preloading
+
+      Use `data-sveltekit-*` attributes for performance:
+
+      ```svelte
+      <!-- Preload data on hover (default) -->
+      <a href="/blog" data-sveltekit-preload-data="hover">Blog</a>
+
+      <!-- Preload on viewport enter -->
+      <a href="/about" data-sveltekit-preload-data="viewport">About</a>
+
+      <!-- Force full page reload -->
+      <a href="/external" data-sveltekit-reload>External</a>
+
+      <!-- Prevent scrolling to top -->
+      <a href="#section" data-sveltekit-noscroll>Jump to section</a>
+      ```
+
+      ## TypeScript
+
+      - Always use `lang="ts"` in script blocks
+      - Define interfaces for props, not inline types
+      - Use `import type` for type-only imports
+      - Leverage `$types` for SvelteKit generated types
+
+      ## Event Handling
+
+      Use the new event attribute syntax (Svelte 5):
+
+      ```svelte
+      <!-- Correct: Svelte 5 syntax -->
+      <button onclick={() => count++}>Click</button>
+      <input oninput={(e) => value = e.currentTarget.value} />
+
+      <!-- Avoid: Legacy syntax -->
+      <button on:click={() => count++}>Click</button>
+      ```
+
+      ## Accessibility
+
+      - Always include `alt` attributes on images
+      - Use semantic HTML elements (`<nav>`, `<main>`, `<article>`, etc.)
+      - Ensure interactive elements are keyboard accessible
+      - Use ARIA attributes when semantic HTML isn't sufficient
+
+      ```svelte
+      <!-- Good -->
+      <button onclick={handleClick}>Submit</button>
+
+      <!-- Bad: div with click handler -->
+      <div onclick={handleClick}>Submit</div>
+      ```
+
+      ## Shared State
+
+      For cross-component state, use `.svelte.ts` files with `$state`:
+
+      ```typescript
+      // state.svelte.ts
+      export const appState = $state({
+        user: null as User | null,
+        theme: 'light' as 'light' | 'dark'
+      });
+
+      export function setUser(user: User) {
+        appState.user = user;
+      }
+      ```
+
+      ## Performance
+
+      - Use `{#key}` blocks to force re-renders when needed
+      - Avoid unnecessary reactivity (not everything needs `$state`)
+      - Use `$effect.pre()` for DOM measurements before paint
+      - Leverage `{#await}` for async data in templates
+
+      ## Styling
+
+      - Prefer Tailwind CSS classes over `<style>` blocks
+      - Use `class:` directive for conditional classes
+      - Keep styles scoped when using `<style>` blocks
+
+      ```svelte
+      <a
+        href="/about"
+        class="text-sm hover:underline"
+        class:font-bold={isActive}
+      >
+        About
+      </a>
+      ```
+
+      ## Checklist
+
+      - [ ] Using `$props()` with typed interface
+      - [ ] Using `$state()` for reactive variables
+      - [ ] Using `$derived()` or `$derived.by()` for computed values
+      - [ ] Using `$bindable()` for two-way bound props
+      - [ ] Using new event syntax (`onclick` not `on:click`)
+      - [ ] Not destructuring reactive state (preserving proxy)
+      - [ ] TypeScript enabled with `lang="ts"`
+      - [ ] Semantic HTML and accessibility considered
+      - [ ] Load functions properly typed with `$types`
+      - [ ] Environment variables using correct `$env` module
+      - [ ] Error hooks implemented for production apps
+
+metadata:
+  priority: high
+  version: 2.0
+</rule>

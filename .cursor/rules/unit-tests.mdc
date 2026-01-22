@@ -1,0 +1,160 @@
+---
+description: Unit Test Guidelines
+globs: **/*.test.ts, **/*.spec.ts
+---
+# Unit Test Guidelines
+
+Standards for writing unit tests using Vitest with nested describe blocks and faker.js.
+
+<rule>
+name: unit_test_format
+description: Enforce consistent unit test structure and best practices
+
+actions:
+  - type: enforce
+    message: |
+      All unit tests MUST follow this nested `describe` and `it` format:
+
+      ## Basic Structure
+
+      ```ts
+      import { describe, it, expect, beforeEach } from 'vitest'
+      import { faker } from '@faker-js/faker'
+
+      describe('ComponentName or Feature', () => {
+        let mockData: SomeType
+
+        beforeEach(() => {
+          // Extract common setup logic here
+          mockData = {
+            id: faker.string.uuid(),
+            name: faker.company.name(),
+            email: faker.internet.email(),
+          }
+        })
+
+        describe('and when the behaviour is this', () => {
+          it('should do that', async () => {
+            // Arrange (if needed beyond beforeEach)
+            const expectedValue = faker.lorem.word()
+
+            // Act
+            const result = await someFunction(expectedValue)
+
+            // Assert
+            expect(result).toContain(expectedValue)
+          })
+        })
+
+        describe('and when another condition occurs', () => {
+          let additionalMockData: AnotherType
+
+          beforeEach(() => {
+            // Nested beforeEach for this specific context
+            additionalMockData = faker.lorem.sentence()
+          })
+
+          it('should perform another action', () => {
+            // test implementation
+          })
+        })
+      })
+      ```
+
+      ## Key Principles
+
+      - **Nested `describe` blocks**: Use nested `describe` blocks to organise tests by behaviour and context
+      - **Descriptive test names**: Use `it('should...')` format for clear test intent
+      - **Behaviour-driven**: Focus on describing the behaviour, not the implementation
+      - **Context with `and when`**: Use `and when` to describe preconditions or scenarios
+      - **faker.js for test data**: Use `@faker-js/faker` to generate realistic test data instead of hardcoded values
+      - **beforeEach for setup**: Extract common test setup logic into `beforeEach` blocks to avoid repetition
+
+      ## Real-World Example
+
+      ```ts
+      import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+      import { faker } from '@faker-js/faker'
+      import { fetchLocations } from './locations'
+
+      describe('locations.ts', () => {
+        beforeEach(() => {
+          vi.useFakeTimers()
+        })
+
+        afterEach(() => {
+          vi.restoreAllMocks()
+        })
+
+        describe('and when a location is fetched successfully', () => {
+          let expectedLocation: Location
+          let locationId: string
+
+          beforeEach(() => {
+            // Use faker.js to generate test data
+            locationId = faker.string.uuid()
+            expectedLocation = {
+              id: locationId,
+              lastUpdated: faker.date.recent().toISOString(),
+              name: faker.company.name(),
+              address: faker.location.streetAddress()
+            }
+            vi.spyOn(global, 'fetch').mockResolvedValue({
+              ok: true,
+              json: () => Promise.resolve(expectedLocation)
+            } as Response)
+          })
+
+          it('should call the correct URL', async () => {
+            await fetchLocations(locationId)
+            expect(fetch).toHaveBeenCalledWith(
+              expect.stringContaining(locationId)
+            )
+          })
+
+          it('should return the location data', async () => {
+            const result = await fetchLocations(locationId)
+            expect(result).toEqual(expectedLocation)
+          })
+
+          it('should only fetch once if called multiple times with same id', async () => {
+            // Use faker to generate random iteration count
+            for (let i = 0; i < faker.number.int({ min: 2, max: 10 }); i++) {
+              await fetchLocations(locationId)
+            }
+            expect(fetch).toHaveBeenCalledTimes(1)
+          })
+        })
+
+        describe('and when fetching a location is NOT successful', () => {
+          let locationId: string
+
+          beforeEach(() => {
+            locationId = faker.string.uuid()
+            vi.spyOn(global, 'fetch').mockResolvedValue({
+              ok: false,
+              status: 500
+            } as Response)
+          })
+
+          it('should throw an error', async () => {
+            await expect(fetchLocations(locationId)).rejects.toThrow()
+          })
+        })
+      })
+      ```
+
+      ## Checklist
+
+      - [ ] Top-level `describe` names the component/feature being tested
+      - [ ] Nested `describe` blocks use `and when` to describe context/conditions
+      - [ ] All `it` blocks start with `should`
+      - [ ] Test data is generated with `@faker-js/faker`, not hardcoded
+      - [ ] Common setup is extracted to `beforeEach` blocks
+      - [ ] Cleanup logic is in `afterEach` blocks where needed
+      - [ ] Tests follow Arrange-Act-Assert pattern
+
+metadata:
+  priority: high
+  version: 1.0
+</rule>

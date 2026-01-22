@@ -1,0 +1,56 @@
+---
+description: Auto-commit and push spec changes
+globs: specs/*.md, SPECS.md
+---
+# Specs Auto-Commit
+
+Automatically commit and push changes whenever specification files are updated.
+
+<rule>
+name: specs_auto_commit
+description: Commit and push to the repository whenever spec files are modified
+
+actions:
+  - type: enforce
+    message: |
+      When any specification file is created or modified:
+
+      1. **Always commit the changes** using conventional commits format:
+         ```
+         docs(specs): <description of what changed>
+         ```
+
+      2. **Always push to the remote repository** after committing
+
+      ## Applicable Files
+
+      This rule applies to:
+      - All files in the `specs/` directory
+      - The `SPECS.md` file in the project root
+
+      ## Content Guidelines
+
+      **Do NOT include "Future Considerations" sections in spec files.**
+
+      Spec files should document current decisions and requirements, not speculative future work. If something isn't being implemented now, it doesn't belong in the spec. Future ideas can go in GitHub issues or a separate roadmap document.
+
+      ## Example Workflow
+
+      After updating `specs/authentication.md`:
+      ```bash
+      git add specs/authentication.md
+      git commit -m "docs(specs): update authentication flow requirements"
+      git push
+      ```
+
+      After creating a new spec file:
+      ```bash
+      git add specs/new-feature.md
+      git commit -m "docs(specs): add new-feature specification"
+      git push
+      ```
+
+metadata:
+  priority: high
+  version: 1.0
+</rule>

@@ -5,16 +5,32 @@ alwaysApply: true
 ---
 # Git Worktrees
 
-Always create a git worktree when working on any task.
+Create a git worktree when writing or modifying code.
 
 <rule>
 name: git_worktrees
-description: Enforce creating git worktrees for all work
+description: Enforce creating git worktrees for code changes
 
 actions:
   - type: enforce
     message: |
-      Before starting any work, create a git worktree for the task.
+      Before writing or modifying code, create a git worktree for the task.
+
+      ## When to Create a Worktree
+
+      **Required for:**
+      - New features or functionality
+      - Bug fixes
+      - Refactoring code
+      - Adding or modifying tests
+      - Any changes to `.svelte`, `.ts`, `.js`, `.css` files, or similar
+
+      **Not required for:**
+      - Updating documentation (`.md` files, `README`)
+      - Modifying cursor rules (`.mdc` files)
+      - Configuration tweaks (unless they affect runtime behaviour)
+      - Reading or exploring the codebase
+      - Answering questions about the code
 
       ## Why Worktrees
 
@@ -67,15 +83,6 @@ actions:
       npm install
       # ... do work ...
       ```
-
-      ## No Exceptions
-
-      This rule has NO exceptions. Always create a worktree, regardless of:
-      - How small the change is
-      - Whether it's "just documentation"
-      - How urgent it seems
-
-      Every change goes through a worktree. No excuses.
 
 metadata:
   priority: high
